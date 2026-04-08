@@ -191,6 +191,14 @@ class HealthisureEnvironment(Environment):
             terminal_reason = "budget_exceeded"
             ep["cumulative_reward"] = round(ep["cumulative_reward"] + PENALTY_STEP_BUDGET, 4)
 
+        # Clamp final score to (0.001, 0.999) — OpenEnv requires strictly
+        # between 0 and 1; raw rewards can underflow to 0.0 (all failures)
+        # or overflow above 1.0 (Task 3 perfect path reaches ~1.20).
+        if done:
+            ep["cumulative_reward"] = round(
+                max(0.001, min(0.999, ep["cumulative_reward"])), 4
+            )
+
         ep["done"] = done
 
         error_msg = result.get("error") if not result.get("success") else None
