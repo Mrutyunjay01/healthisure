@@ -38,15 +38,20 @@ app = create_app(
 
 def main(host: str = "0.0.0.0", port: int | None = None):
     import os
+    import argparse
     import uvicorn
-    resolved_port = port if port is not None else int(os.getenv("PORT", "8000"))
-    uvicorn.run(app, host=host, port=resolved_port)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default=host)
+    parser.add_argument("--port", type=int, default=None)
+    args, _ = parser.parse_known_args()
+
+    resolved_host = args.host
+    resolved_port = args.port if args.port is not None else (
+        port if port is not None else int(os.getenv("PORT", "8000"))
+    )
+    uvicorn.run(app, host=resolved_host, port=resolved_port)
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=8000)
-    args = parser.parse_args()
-    main(port=args.port)
+    main()
