@@ -155,6 +155,7 @@ cp .env.example .env   # then edit .env to add your HF_TOKEN
 | `API_BASE_URL` | `https://router.huggingface.co/v1` | LLM API endpoint |
 | `MODEL_NAME` | `Qwen/Qwen2.5-72B-Instruct` | LLM model name |
 | `ENV_URL` | `http://localhost:8000` | HealthClaim-Env server URL used by inference.py |
+| `LOCAL_IMAGE_NAME` | *(optional)* | Local Docker image tag to auto-run when compose is unavailable (e.g. `healthisure:latest`) |
 
 ---
 
@@ -211,8 +212,8 @@ ENV_URL=https://your-space.hf.space uv run python inference.py
 # Build
 docker build -t healthclaim-env .
 
-# Run (port 7860 = HF Spaces default; map to 8000 locally)
-docker run -p 8000:7860 --env-file .env healthclaim-env
+# Run (maps host port 8000 → container port 8000)
+docker run -p 8000:8000 --env-file .env healthclaim-env
 ```
 
 ---

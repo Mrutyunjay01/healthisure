@@ -50,6 +50,9 @@ API_BASE_URL: str = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"
 MODEL_NAME: str = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 HF_TOKEN: Optional[str] = os.getenv("HF_TOKEN")
 ENV_URL: str = os.getenv("ENV_URL", "http://localhost:8000")
+# Optional: name/tag of a locally-built Docker image to run when the server
+# isn't already up and docker compose is not available (e.g. "healthisure:latest").
+LOCAL_IMAGE_NAME: Optional[str] = os.getenv("LOCAL_IMAGE_NAME")
 
 if HF_TOKEN is None:
     raise ValueError("HF_TOKEN environment variable is required (set it in .env or export it)")
@@ -62,6 +65,7 @@ llm = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 _server_proc: Optional[subprocess.Popen] = None  # type: ignore[type-arg]
 _started_with_compose: bool = False
+_docker_run_container_id: Optional[str] = None
 
 
 def _server_is_up(url: str, timeout: float = 2.0) -> bool:
@@ -120,10 +124,58 @@ def ensure_server(url: str = ENV_URL) -> None:
 
     print(f"[INFO] Server not detected at {url} — starting automatically…", file=sys.stderr, flush=True)
 
-    if _docker_compose_available():
+    if LOCAL_IMAGE_NAME:
+        _start_with_docker_run(LOCAL_IMAGE_NAME, url)
+    elif _docker_compose_available():
         _start_with_compose(url)
     else:
         _start_with_uvicorn(url)
+
+
+def _start_with_docker_run(image_name: str, url: str) -> None:
+    """Start the server by running a local Docker image with ``docker run``."""
+    global _docker_run_container_id
+
+    # Parse host port from url (default 8000)
+    port = "8000"
+    try:
+        parsed_port = url.rsplit(":", 1)[-1].split("/")[0]
+        if parsed_port.isdigit():
+            port = parsed_port
+    except Exception:
+        pass
+
+    print(f"[INFO] Starting local Docker image '{image_name}' on port {port}…", file=sys.stderr, flush=True)
+
+    cmd = [
+        "docker", "run", "--rm", "-d",
+        "-p", f"{port}:{port}",
+        "-e", f"PORT={port}",
+    ]
+    # Forward relevant env vars into the container
+    for var in ("HF_TOKEN", "API_BASE_URL", "MODEL_NAME", "ENABLE_WEB_INTERFACE"):
+        val = os.getenv(var)
+        if val:
+            cmd += ["-e", f"{var}={val}"]
+    cmd.append(image_name)
+
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        _docker_run_container_id = result.stdout.strip()
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"docker run {image_name} failed — see output above."
+        ) from exc
+
+    if not _wait_for_server(url, attempts=40, interval=1.0):
+        if _docker_run_container_id:
+            subprocess.run(["docker", "stop", _docker_run_container_id], check=False)
+            _docker_run_container_id = None
+        raise RuntimeError(
+            f"Server from image '{image_name}' did not become healthy within 40 s."
+        )
+
+    print(f"[INFO] Server is up (docker run / {image_name}).", file=sys.stderr, flush=True)
 
 
 def _start_with_compose(url: str) -> None:
@@ -179,13 +231,18 @@ def _start_with_uvicorn(url: str) -> None:
 
 
 def stop_server() -> None:
-    """Stop the auto-started server (docker compose or uvicorn subprocess)."""
-    global _server_proc, _started_with_compose
+    """Stop the auto-started server (docker compose, docker run, or uvicorn subprocess)."""
+    global _server_proc, _started_with_compose, _docker_run_container_id
 
     if _started_with_compose:
         print("[INFO] Stopping docker compose server…", file=sys.stderr, flush=True)
         subprocess.run(["docker", "compose", "stop", "server"], check=False)
         _started_with_compose = False
+
+    if _docker_run_container_id:
+        print(f"[INFO] Stopping docker container {_docker_run_container_id[:12]}…", file=sys.stderr, flush=True)
+        subprocess.run(["docker", "stop", _docker_run_container_id], check=False)
+        _docker_run_container_id = None
 
     if _server_proc is not None:
         _server_proc.terminate()
