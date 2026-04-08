@@ -1,5 +1,5 @@
 ---
-title: HealthClaim-Env
+title: Healthisure
 emoji: 🏥
 colorFrom: blue
 colorTo: green
@@ -7,7 +7,7 @@ sdk: docker
 pinned: false
 ---
 
-# HealthClaim-Env
+# Healthisure
 
 A fully **OpenEnv-compliant** reinforcement learning environment that simulates an AI-powered health insurance support specialist. Built for the Meta OpenEnv Hackathon.
 
@@ -15,7 +15,7 @@ A fully **OpenEnv-compliant** reinforcement learning environment that simulates 
 
 ## Overview
 
-HealthClaim-Env places an RL agent in the role of a health insurance support specialist handling real-world member queries: benefit verification, prior authorization disputes, claim reviews, and multi-party coordination of benefits (COB). The environment is **stateful and reactive** — each agent action changes the episode state, triggers consequences, and earns a shaped reward signal.
+Healthisure places an RL agent in the role of a health insurance support specialist handling real-world member queries: benefit verification, prior authorization disputes, claim reviews, and multi-party coordination of benefits (COB). The environment is **stateful and reactive** — each agent action changes the episode state, triggers consequences, and earns a shaped reward signal.
 
 Key properties:
 
@@ -154,7 +154,7 @@ cp .env.example .env   # then edit .env to add your HF_TOKEN
 | `HF_TOKEN` | *(required)* | Hugging Face API token |
 | `API_BASE_URL` | `https://router.huggingface.co/v1` | LLM API endpoint |
 | `MODEL_NAME` | `Qwen/Qwen2.5-72B-Instruct` | LLM model name |
-| `ENV_URL` | `http://localhost:8000` | HealthClaim-Env server URL used by inference.py |
+| `ENV_URL` | `http://localhost:8000` | Healthisure server URL used by inference.py |
 | `LOCAL_IMAGE_NAME` | *(optional)* | Local Docker image tag to auto-run when compose is unavailable (e.g. `healthisure:latest`) |
 
 ---
@@ -210,10 +210,10 @@ ENV_URL=https://your-space.hf.space uv run python inference.py
 
 ```bash
 # Build
-docker build -t healthclaim-env .
+docker build -t healthisure .
 
 # Run (maps host port 8000 → container port 8000)
-docker run -p 8000:8000 --env-file .env healthclaim-env
+docker run -p 8000:8000 --env-file .env healthisure
 ```
 
 ---
@@ -227,19 +227,19 @@ docker run -p 8000:8000 --env-file .env healthclaim-env
 | `/step` | POST | Execute an action |
 | `/state` | GET | Current episode state |
 | `/schema` | GET | Action and observation JSON schemas |
-| `/ws` | WebSocket | Persistent stateful session (used by `HealthClaimEnvClient`) |
+| `/ws` | WebSocket | Persistent stateful session (used by `HealthisureEnvClient`) |
 | `/web` | GET | Gradio playground UI (enabled via `ENABLE_WEB_INTERFACE=true`) |
 
 > **Note:** Use `/ws` (WebSocket) for multi-step episodes. The HTTP `/reset` and `/step` endpoints create a new environment instance per request and cannot maintain state across calls.
 
 ### Client-Server Architecture
 
-`inference.py` uses `HealthClaimEnvClient` from `client.py`, which wraps the OpenEnv `EnvClient` over WebSocket:
+`inference.py` uses `HealthisureEnvClient` from `client.py`, which wraps the OpenEnv `EnvClient` over WebSocket:
 
 ```python
-from client import HealthClaimEnvClient
+from client import HealthisureEnvClient
 
-with HealthClaimEnvClient(base_url="http://localhost:8000").sync() as env:
+with HealthisureEnvClient(base_url="http://localhost:8000").sync() as env:
     result = env.reset(task_name="task1")
     obs = result.observation
     # ... episode loop ...
@@ -266,8 +266,8 @@ curl -X POST http://localhost:8000/step \
 
 ```sh
 meta-openenv-26/
-├── models.py             # Shared: HealthClaimAction + HealthClaimObservation (Pydantic)
-├── client.py             # Shared: HealthClaimEnvClient (OpenEnv WebSocket client)
+├── models.py             # Shared: HealthisureAction + HealthisureObservation (Pydantic)
+├── client.py             # Shared: HealthisureEnvClient (OpenEnv WebSocket client)
 ├── inference.py          # Baseline LLM agent (uses client.py)
 ├── Dockerfile            # Container definition (port 7860 for HF Spaces)
 ├── docker-compose.yml    # Compose: server on localhost:8000, Gradio at /web
@@ -278,7 +278,7 @@ meta-openenv-26/
 ├── docs/                 # Architecture and planning docs
 └── server/
     ├── app.py            # FastAPI app (openenv-core create_app + Gradio at /web)
-    ├── environment.py    # HealthClaimEnvironment core
+    ├── environment.py    # HealthisureEnvironment core
     ├── tasks/            # Task 1, 2, 3 scenario definitions + BaseTask
     ├── actions/          # 12 action handler implementations
     ├── graders/          # Deterministic step-level reward graders + BaseGrader
@@ -328,6 +328,6 @@ ENV_URL=https://<your-username>-<space-name>.hf.space uv run python inference.py
 
 - **No live databases or external APIs** — all data is served from `server/data/*.json`
 - **Deterministic grading** — rewards are computed by rule-based graders, not LLMs
-- **Stateful episodes** — use the WebSocket endpoint `/ws` (via `HealthClaimEnvClient`) for multi-step episodes; HTTP `/reset` and `/step` are stateless
+- **Stateful episodes** — use the WebSocket endpoint `/ws` (via `HealthisureEnvClient`) for multi-step episodes; HTTP `/reset` and `/step` are stateless
 - **OpenEnv-core SDK** — uses `openenv-core[core]>=0.2.2` (not the PyPI `openenv` package)
-- **Client-server separation** — `inference.py` never imports the environment directly; it only communicates via HTTP/WebSocket through `HealthClaimEnvClient`
+- **Client-server separation** — `inference.py` never imports the environment directly; it only communicates via HTTP/WebSocket through `HealthisureEnvClient`
