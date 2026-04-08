@@ -19,5 +19,5 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git remote add space https://ultron01:${HF_TOKEN}@huggingface.co/spaces/ultron01/healtisure
+          git remote add space https://ultron01:${HF_TOKEN}@huggingface.co/spaces/ultron01/healthisure
           git push space main --force
