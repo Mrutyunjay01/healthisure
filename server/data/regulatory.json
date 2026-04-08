@@ -1,0 +1,83 @@
+{
+  "aca_preventive_care": {
+    "rule_id": "aca_preventive_care",
+    "name": "ACA Preventive Care Mandate",
+    "citation": "ACA Section 2713, 42 U.S.C. § 300gg-13",
+    "description": "Under the Affordable Care Act, non-grandfathered health plans must cover evidence-based preventive services recommended by the U.S. Preventive Services Task Force (USPSTF) with an A or B rating, at no cost to the member when provided by an in-network provider.",
+    "affected_cpt_codes": ["Z23"],
+    "member_cost": 0.00,
+    "applies_to_network": "in_network",
+    "enforcement": "Plans that apply cost-sharing to ACA preventive services violate federal law and are subject to regulatory action."
+  },
+  "aca_er_parity": {
+    "rule_id": "aca_er_parity",
+    "name": "ACA Emergency Services Parity Rule",
+    "citation": "ACA Section 2719A, 45 CFR § 147.138",
+    "description": "Plans must cover emergency services at in-network cost-sharing levels, even when the ER provider is out-of-network. Prior authorization cannot be required for emergency services. The member's cost share must be calculated using the in-network rates, not out-of-network rates.",
+    "affected_cpt_codes": ["99281", "99282", "99283", "99284", "99285"],
+    "network_treatment": "in_network_rates_apply",
+    "prior_auth_required": false,
+    "enforcement": "Out-of-network ER cost shares applied at out-of-network rates violate ACA and must be corrected upon appeal."
+  },
+  "mhpaea": {
+    "rule_id": "mhpaea",
+    "name": "Mental Health Parity and Addiction Equity Act (MHPAEA)",
+    "citation": "29 U.S.C. § 1185a, ACA Section 1311(j)",
+    "description": "The MHPAEA prohibits health plans from imposing financial requirements (deductibles, copays, coinsurance) or treatment limitations (visit limits, prior authorization) on mental health and substance use disorder benefits that are more restrictive than those applied to medical and surgical benefits. Plans cannot apply medical necessity criteria to behavioral health more stringently than to comparable medical services.",
+    "affected_cpt_codes": ["90837", "90832", "90834", "90839", "90840", "H0001"],
+    "enforcement": "Denials citing 'not medically necessary' for behavioral health services, when equivalent medical services would be covered, violate MHPAEA and are subject to appeal and regulatory complaint.",
+    "aca_citation": "ACA Section 1311(j) requires QHPs to comply with MHPAEA"
+  },
+  "cob_rules": {
+    "rule_id": "cob_rules",
+    "name": "Coordination of Benefits (COB) Rules",
+    "citation": "NAIC Model COB Regulation",
+    "description": "When a member has coverage under two health plans, coordination of benefits rules determine which plan pays first (primary) and which pays second (secondary). The primary plan pays as if there were no other coverage. The secondary plan then pays some or all of the remaining balance, up to the secondary plan's liability.",
+    "primary_determination_rules": {
+      "own_employer": "A member's own employer plan is always primary over a spouse's employer plan.",
+      "birthday_rule": "For dependent children, the plan of the parent whose birthday falls earlier in the calendar year is primary.",
+      "active_vs_cobra": "Active employment coverage is primary over COBRA coverage."
+    },
+    "secondary_payment": "The secondary plan pays the lesser of: (a) what it would pay as the only plan, or (b) the member's remaining balance after primary payment.",
+    "filing_requirements": "Secondary claims must be filed with the Explanation of Benefits (EOB) from the primary plan attached."
+  },
+  "filing_deadlines": {
+    "rule_id": "filing_deadlines",
+    "name": "Claim Filing Deadlines",
+    "description": "Health plans set claim filing deadlines, typically 90 to 365 days from the date of service. Failure to file within this window may result in claim denial.",
+    "standard_deadline_days": 90,
+    "exception_clauses": {
+      "provider_billing_error": {
+        "applies": true,
+        "description": "If the late filing was caused by an error on the part of the provider (e.g., billing to incorrect address, administrative delay), the deadline exception may be invoked. Documentation of the provider error is required.",
+        "required_documentation": ["Corrected billing statement with date received", "Provider acknowledgment of billing error", "Timeline showing delay was not member-caused"]
+      },
+      "coordination_of_benefits_delay": {
+        "applies": true,
+        "description": "Delays caused by COB processing between primary and secondary insurers may qualify for deadline exceptions.",
+        "required_documentation": ["Primary insurer EOB", "Evidence of timely secondary filing attempt"]
+      },
+      "medical_incapacitation": {
+        "applies": true,
+        "description": "If the member was medically incapacitated and unable to file, a deadline exception may apply with physician documentation."
+      }
+    }
+  },
+  "appeal_rights": {
+    "rule_id": "appeal_rights",
+    "name": "Member Appeal Rights",
+    "citation": "ACA Section 2719, 29 CFR § 2560.503-1",
+    "description": "Members have the right to appeal any adverse benefit determination. Plans must provide a full and fair review process.",
+    "internal_appeal_deadline_days": 60,
+    "external_review_available": true,
+    "external_review_deadline_days": 60,
+    "required_appeal_elements": [
+      "Claim identification number",
+      "Date of service",
+      "Reason for appeal (citing plan language or regulatory provision)",
+      "Supporting documentation (medical records, PA reference numbers, EOBs)",
+      "Requested resolution"
+    ],
+    "urgent_appeal": "For urgent medical situations, expedited appeal decisions must be made within 72 hours."
+  }
+}

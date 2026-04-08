@@ -1,0 +1,17 @@
+services:
+  server:
+    build: .
+    ports:
+      - "8000:8000"   # host:container — access at http://localhost:8000
+    env_file:
+      - .env
+    environment:
+      - ENABLE_WEB_INTERFACE=true
+      - PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped

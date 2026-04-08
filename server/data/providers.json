@@ -1,0 +1,49 @@
+{
+  "PRV-101": {
+    "provider_id": "PRV-101",
+    "name": "Sunrise Medical Imaging Center",
+    "npi": "1234567890",
+    "specialty": "Radiology",
+    "in_network_plans": ["GOLD-001", "SILVER-001", "BRONZE-001"],
+    "address": "450 Medical Plaza Dr, San Francisco, CA 94102",
+    "phone": "415-555-0101"
+  },
+  "PRV-202": {
+    "provider_id": "PRV-202",
+    "name": "Bay Area Orthopedic Specialists",
+    "npi": "2345678901",
+    "specialty": "Orthopedic Surgery",
+    "in_network_plans": ["GOLD-001", "SILVER-001"],
+    "address": "820 Orthopedic Way, Oakland, CA 94610",
+    "phone": "510-555-0202"
+  },
+  "PRV-303": {
+    "provider_id": "PRV-303",
+    "name": "Valley Emergency Group",
+    "npi": "3456789012",
+    "specialty": "Emergency Medicine",
+    "in_network_plans": [],
+    "out_of_network": true,
+    "address": "1200 Valley Blvd, Riverside, CA 92501",
+    "phone": "951-555-0303",
+    "notes": "Out-of-network ER provider. ACA requires in-network cost-sharing apply for emergency services regardless of network status."
+  },
+  "PRV-404": {
+    "provider_id": "PRV-404",
+    "name": "Mindful Therapy Associates",
+    "npi": "4567890123",
+    "specialty": "Behavioral Health / Psychiatry",
+    "in_network_plans": ["GOLD-001", "SILVER-001", "BRONZE-001"],
+    "address": "300 Wellness Blvd Suite 12, San Jose, CA 95110",
+    "phone": "408-555-0404"
+  },
+  "PRV-505": {
+    "provider_id": "PRV-505",
+    "name": "Mountain View Orthopedics",
+    "npi": "5678901234",
+    "specialty": "Orthopedic Surgery",
+    "in_network_plans": ["GOLD-001", "SILVER-001", "BRONZE-001"],
+    "address": "750 Hospital Drive, Sacramento, CA 95814",
+    "phone": "916-555-0505"
+  }
+}

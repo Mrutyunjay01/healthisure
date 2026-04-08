@@ -1,0 +1,67 @@
+{
+  "CO-4": {
+    "code": "CO-4",
+    "category": "Contractual Obligation",
+    "short_description": "The service/equipment/drug is not covered by the plan.",
+    "full_description": "The procedure, service, or equipment billed is not a covered benefit under the member's health plan. This may be because the procedure itself is excluded, prior authorization was required and not obtained, or the procedure is not medically necessary per plan guidelines.",
+    "common_causes": [
+      "Prior authorization not obtained",
+      "Service excluded from plan benefits",
+      "Procedure performed outside plan coverage rules"
+    ],
+    "member_action": "Contact your insurer to understand exactly why coverage was denied. If prior authorization was required, work with your provider to obtain it before resubmitting. If you believe the denial is incorrect, you have the right to appeal within 60 days.",
+    "appeal_eligible": true
+  },
+  "CO-50": {
+    "code": "CO-50",
+    "category": "Contractual Obligation",
+    "short_description": "Non-covered service - not deemed medically necessary.",
+    "full_description": "The service was denied because the payer determined it was not medically necessary based on clinical guidelines. This does not necessarily mean the service was inappropriate — it means the payer's medical reviewers found insufficient clinical evidence to support coverage under the plan terms.",
+    "common_causes": [
+      "Insufficient clinical documentation submitted",
+      "Service not meeting insurer's medical necessity criteria",
+      "Mental health parity violation (if applied to behavioral health)",
+      "Experimental or investigational determination"
+    ],
+    "member_action": "Request the specific clinical criteria used to make the determination. If your provider can supply additional medical records or documentation, request a peer-to-peer review. File an appeal with supporting documentation within 60 days.",
+    "appeal_eligible": true
+  },
+  "CO-97": {
+    "code": "CO-97",
+    "category": "Contractual Obligation",
+    "short_description": "Payment already included in a prior payment.",
+    "full_description": "The service billed was already paid as part of a bundled payment or a previous claim. This typically occurs when a procedure is normally bundled with another service per CMS bundling guidelines (NCCI edits).",
+    "common_causes": [
+      "Unbundling — billing separately for services that must be billed together",
+      "Duplicate claim submission",
+      "Global surgical package — pre/post-op care already included"
+    ],
+    "member_action": "Verify with your provider that the claim was not a duplicate submission. If services were legitimately separate, the provider may need to use a modifier to indicate the service was distinct.",
+    "appeal_eligible": true
+  },
+  "PR-1": {
+    "code": "PR-1",
+    "category": "Patient Responsibility",
+    "short_description": "Deductible amount — patient responsibility.",
+    "full_description": "The amount shown is applied toward the member's annual deductible. The plan did not pay this portion because the deductible has not yet been met. Once the deductible is satisfied, the plan will begin cost-sharing per the coinsurance or copay schedule.",
+    "common_causes": [
+      "Annual deductible not yet met",
+      "Service subject to deductible before cost-sharing kicks in"
+    ],
+    "member_action": "This is a normal billing event. You owe this amount toward your annual deductible. Track your deductible progress via the member portal or by contacting member services.",
+    "appeal_eligible": false
+  },
+  "CO-4-ACA": {
+    "code": "CO-4-ACA",
+    "category": "Contractual Obligation / ACA Violation",
+    "short_description": "ACA preventive care denial — coverage required at 100%.",
+    "full_description": "Under the Affordable Care Act (ACA), preventive services that receive an A or B rating from the U.S. Preventive Services Task Force (USPSTF) must be covered at 100% with no cost share when provided by an in-network provider. Denying or applying cost share to these services violates federal law.",
+    "common_causes": [
+      "Billing code not recognized as ACA preventive service",
+      "Service performed as part of a diagnostic visit (not purely preventive)"
+    ],
+    "member_action": "File an appeal citing ACA Section 2713 (preventive services mandate). Request the insurer clarify whether the service was classified as preventive. If denied again, file a complaint with your State Insurance Commissioner.",
+    "appeal_eligible": true,
+    "aca_citation": "ACA Section 2713, 42 U.S.C. § 300gg-13"
+  }
+}

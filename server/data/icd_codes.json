@@ -1,0 +1,42 @@
+{
+  "G35": {
+    "code": "G35",
+    "description": "Multiple sclerosis",
+    "category": "Neurological Disorders"
+  },
+  "M17.11": {
+    "code": "M17.11",
+    "description": "Primary osteoarthritis, right knee",
+    "category": "Musculoskeletal"
+  },
+  "M17.12": {
+    "code": "M17.12",
+    "description": "Primary osteoarthritis, left knee",
+    "category": "Musculoskeletal"
+  },
+  "S72.001A": {
+    "code": "S72.001A",
+    "description": "Fracture of unspecified part of neck of right femur, initial encounter for closed fracture",
+    "category": "Injury / Trauma"
+  },
+  "F32.1": {
+    "code": "F32.1",
+    "description": "Major depressive disorder, single episode, moderate",
+    "category": "Mental Health"
+  },
+  "J18.9": {
+    "code": "J18.9",
+    "description": "Pneumonia, unspecified organism",
+    "category": "Respiratory"
+  },
+  "I21.09": {
+    "code": "I21.09",
+    "description": "ST elevation (STEMI) myocardial infarction involving other coronary artery of anterior wall",
+    "category": "Cardiac"
+  },
+  "Z00.00": {
+    "code": "Z00.00",
+    "description": "Encounter for general adult medical examination without abnormal findings",
+    "category": "Preventive / Wellness"
+  }
+}

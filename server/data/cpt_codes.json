@@ -1,0 +1,82 @@
+{
+  "70553": {
+    "code": "70553",
+    "description": "MRI Brain with and without contrast",
+    "category": "Radiology",
+    "typical_cost": 2500.00,
+    "requires_referral": false,
+    "notes": "Prior authorization required by most plans for non-emergency settings."
+  },
+  "27447": {
+    "code": "27447",
+    "description": "Total knee arthroplasty (replacement)",
+    "category": "Orthopedic Surgery",
+    "typical_cost": 25000.00,
+    "requires_referral": true,
+    "notes": "Prior authorization required by all plans. ICD-10 M17.11 (primary osteoarthritis, right knee) commonly associated."
+  },
+  "99213": {
+    "code": "99213",
+    "description": "Office/outpatient visit, established patient, moderate complexity (E&M Level 3)",
+    "category": "Evaluation & Management",
+    "typical_cost": 150.00,
+    "requires_referral": false,
+    "notes": "No prior authorization required. Copay applies."
+  },
+  "90837": {
+    "code": "90837",
+    "description": "Psychotherapy, 60 minutes",
+    "category": "Mental Health",
+    "typical_cost": 200.00,
+    "requires_referral": false,
+    "notes": "Subject to mental health parity (ACA). Must be covered under same terms as medical/surgical benefits."
+  },
+  "99283": {
+    "code": "99283",
+    "description": "Emergency department visit, moderate severity",
+    "category": "Emergency Services",
+    "typical_cost": 1800.00,
+    "requires_referral": false,
+    "notes": "ACA requires in-network cost-sharing regardless of network status. No prior authorization required."
+  },
+  "43239": {
+    "code": "43239",
+    "description": "Upper gastrointestinal endoscopy with biopsy",
+    "category": "Gastroenterology",
+    "typical_cost": 3200.00,
+    "requires_referral": true,
+    "notes": "Prior authorization required for Silver and Bronze plans."
+  },
+  "33533": {
+    "code": "33533",
+    "description": "Coronary artery bypass graft (CABG), arterial, single",
+    "category": "Cardiac Surgery",
+    "typical_cost": 80000.00,
+    "requires_referral": true,
+    "notes": "Prior authorization required by all plans. High complexity procedure."
+  },
+  "Z23": {
+    "code": "Z23",
+    "description": "Encounter for immunization / preventive vaccination",
+    "category": "Preventive Care",
+    "typical_cost": 50.00,
+    "requires_referral": false,
+    "notes": "ACA preventive care mandate: must be covered at 100% with no cost share for in-network providers."
+  },
+  "96413": {
+    "code": "96413",
+    "description": "Chemotherapy administration, intravenous infusion, up to 1 hour",
+    "category": "Oncology",
+    "typical_cost": 5000.00,
+    "requires_referral": true,
+    "notes": "Prior authorization required by all plans."
+  },
+  "93306": {
+    "code": "93306",
+    "description": "Echocardiography, transthoracic, with spectral Doppler",
+    "category": "Cardiology",
+    "typical_cost": 1200.00,
+    "requires_referral": true,
+    "notes": "Prior authorization required for Silver and Bronze plans. Not required for Gold."
+  }
+}
