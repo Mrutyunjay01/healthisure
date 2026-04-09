@@ -1,0 +1,37 @@
+# Virtual environment — rebuilt inside the container by uv sync
+.venv/
+
+# Python bytecode cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+
+# Git history
+.git/
+.gitignore
+.github/
+
+# Local env / secrets
+.env
+*.env
+
+# Dev / test artefacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Docs / notebooks (not needed at runtime)
+docs/
+
+# Editor / OS noise
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
