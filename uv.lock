@@ -722,13 +722,17 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
-    { name = "gradio" },
     { name = "openai" },
     { name = "openenv-core", extra = ["core"] },
-    { name = "pandas" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+web = [
+    { name = "gradio" },
+    { name = "pandas" },
 ]
 
 [package.dev-dependencies]
@@ -740,14 +744,15 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi" },
-    { name = "gradio" },
+    { name = "gradio", marker = "extra == 'web'" },
     { name = "openai", specifier = ">=1.0" },
     { name = "openenv-core", extras = ["core"], specifier = ">=0.2.2" },
-    { name = "pandas" },
+    { name = "pandas", marker = "extra == 'web'" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "uvicorn", extras = ["standard"] },
 ]
+provides-extras = ["web"]
 
 [package.metadata.requires-dev]
 dev = [
