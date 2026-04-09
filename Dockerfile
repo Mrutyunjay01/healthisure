@@ -12,8 +12,10 @@ COPY pyproject.toml uv.lock ./
 # --mount=type=cache persists the cache between builds (faster rebuilds)
 # but is NOT written into the final image layer (smaller image).
 # --extra web installs gradio/pandas for the HF Spaces web interface.
+# UV_LINK_MODE=copy: HF Spaces uses cross-filesystem mounts so hardlinks
+# aren't supported — copy mode avoids the warning and ensures clean installs.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --extra web
+    UV_LINK_MODE=copy uv sync --frozen --no-install-project --extra web
 
 # Copy application code (separate layer so dep installs are not re-run on code changes)
 COPY server/ ./server/
