@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Copy application code (separate layer so dep installs are not re-run on code changes)
 COPY server/ ./server/
-COPY models.py client.py inference.py ./
+COPY models.py client.py inference.py openenv.yaml config.py ./
 
 # Remove bytecode cache that uv/pip may have written during install
 RUN find /app/.venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \

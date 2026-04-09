@@ -20,6 +20,7 @@ from .tasks.task1_eligibility import Task1Eligibility
 from .tasks.task2_prior_auth import Task2PriorAuth
 from .tasks.task3_cob_dispute import Task3CobDispute
 
+import config
 from models import HealthisureAction, HealthisureObservation
 
 # ---------------------------------------------------------------------------
@@ -40,8 +41,8 @@ _GRADERS = {
 
 _DEFAULT_TASK = "task1"
 
-REWARD_FULL_RESOLUTION = 0.30
-PENALTY_STEP_BUDGET = -0.10
+REWARD_FULL_RESOLUTION = config.REWARD_FULL_RESOLUTION
+PENALTY_STEP_BUDGET = config.PENALTY_STEP_BUDGET
 
 
 class HealthisureEnvironment(Environment):
@@ -191,28 +192,21 @@ class HealthisureEnvironment(Environment):
             terminal_reason = "budget_exceeded"
             ep["cumulative_reward"] = round(ep["cumulative_reward"] + PENALTY_STEP_BUDGET, 4)
 
-        # Clamp final score to (0.001, 0.999) — OpenEnv requires strictly
-        # between 0 and 1; raw rewards can underflow to 0.0 (all failures)
-        # or overflow above 1.0 (Task 3 perfect path reaches ~1.20).
+        # Clamp cumulative to [0.01, 0.99] on terminal step.
         if done:
             ep["cumulative_reward"] = round(
-                max(0.001, min(0.999, ep["cumulative_reward"])), 4
+                max(0.01, min(0.99, ep["cumulative_reward"])), 4
             )
 
         ep["done"] = done
 
         error_msg = result.get("error") if not result.get("success") else None
 
-        # Use the clamped cumulative reward as the terminal reward so that the
-        # OpenEnv framework (which reads observation.reward, not cumulative_reward)
-        # always receives a value strictly within (0, 1).
-        reported_reward = ep["cumulative_reward"] if done else step_reward
-
         return self._build_obs(
             last_result=result.get("message", ""),
             error=error_msg,
             done=done,
-            step_reward=reported_reward,
+            step_reward=step_reward,
         )
 
     @property

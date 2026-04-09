@@ -726,6 +726,7 @@ dependencies = [
     { name = "openenv-core", extra = ["core"] },
     { name = "pydantic" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -750,6 +751,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'web'" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "uvicorn", extras = ["standard"] },
 ]
 provides-extras = ["web"]

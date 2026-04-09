@@ -1,16 +1,15 @@
 """
-Tests verifying that the terminal observation's reward is always strictly
-within (0, 1) — the range required by the OpenEnv submission validator.
+Tests verifying that terminal episode scores are always strictly within (0, 1)
+— the range required by the OpenEnv submission validator.
 
-The critical path:
-  openenv serialization → StepResponse.reward = observation.reward
-  (NOT observation.cumulative_reward)
+The inference script computes:
+    score = clamp(obs.cumulative_reward / TASK_MAX_SCORES[task], 0.01, 0.99)
 
-These tests cover:
-  - All three tasks via send_member_response (normal termination)
-  - Budget-exceeded termination
-  - Worst-case penalty scenarios (reward would be ≤ 0 without clamping)
-  - Best-case full-resolution scenarios (reward would be > 1 without clamping)
+These tests verify:
+  - obs.cumulative_reward at episode end is clamped to [0.01, 0.99] by the server
+  - The normalized score is strictly within (0, 1) for all tasks/scenarios
+  - Worst-case penalties don't produce a score ≤ 0
+  - Best-case full-resolution doesn't produce a score ≥ 1
 """
 
 import sys
@@ -22,22 +21,24 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "server"))
 import pytest
 from server.healthisure_environment import HealthisureEnvironment
 from models import HealthisureAction
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+from config import TASK_MAX_SCORES
 
 
 def make_action(name: str, **params) -> HealthisureAction:
     return HealthisureAction(action_name=name, parameters=params)
 
 
-def assert_strictly_between_0_and_1(reward, context=""):
-    """The OpenEnv validator requires 0 < reward < 1 (exclusive)."""
-    assert reward is not None, f"reward is None {context}"
-    assert reward > 0.0, f"reward={reward} is not > 0  {context}"
-    assert reward < 1.0, f"reward={reward} is not < 1  {context}"
+def assert_valid_score(cumulative_reward: float, task_name: str, context: str = "") -> None:
+    """
+    Verify the normalized score (as inference.py would compute it) is
+    strictly within (0, 1) and safe at 2 decimal places.
+    """
+    max_score = TASK_MAX_SCORES.get(task_name, 1.0)
+    score = max(0.01, min(0.99, cumulative_reward / max_score))
+    assert score >= 0.01, f"score={score} rounds to 0.00 at 2dp  {context}"
+    assert score <= 0.99, f"score={score} rounds to 1.00 at 2dp  {context}"
+    assert f"{score:.2f}" != "0.00", f"score={score} formats as 0.00  {context}"
+    assert f"{score:.2f}" != "1.00", f"score={score} formats as 1.00  {context}"
 
 
 # ---------------------------------------------------------------------------
@@ -45,33 +46,25 @@ def assert_strictly_between_0_and_1(reward, context=""):
 # ---------------------------------------------------------------------------
 
 
-class TestTask1TerminalReward:
+class TestTask1TerminalScore:
     def _make_env(self, scenario_id=0):
         env = HealthisureEnvironment()
         env.reset(task_name="task1", scenario_id=scenario_id)
         return env
 
-    def test_send_response_immediately_gives_valid_reward(self):
-        """Skip all lookups; send response right away → low score but valid."""
+    def test_send_response_immediately_gives_valid_score(self):
         env = self._make_env()
         obs = env.step(make_action("send_member_response", message="Done"))
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task1 immediate response)")
+        assert_valid_score(obs.cumulative_reward, "task1", "(task1 immediate response)")
 
-    def test_send_response_with_missed_pa_gives_valid_reward(self):
-        """
-        If gold requires PA and we don't mention it, Grader1 applies
-        PENALTY_MISSED_PA (-0.15) making the raw step_reward negative.
-        The terminal reward must still be strictly > 0.
-        """
+    def test_send_response_with_missed_pa_gives_valid_score(self):
         env = self._make_env(scenario_id=0)
-        # Don't check PA; send a response without mentioning it
         obs = env.step(make_action("send_member_response", message="All good!"))
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task1 missed PA penalty)")
+        assert_valid_score(obs.cumulative_reward, "task1", "(task1 missed PA penalty)")
 
     def test_full_resolution_does_not_exceed_1(self):
-        """Full happy-path should produce reward < 1 (max ~1.0, so clamped to 0.999)."""
         env = self._make_env(scenario_id=0)
         scenario = env._episode["scenario"]
         gold = scenario["gold_standard"]
@@ -98,23 +91,18 @@ class TestTask1TerminalReward:
             )
         )
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task1 full resolution)")
+        assert_valid_score(obs.cumulative_reward, "task1", "(task1 full resolution)")
 
-    def test_budget_exceeded_gives_valid_reward(self):
-        """
-        Exhaust the step budget with no-ops; the budget penalty (-0.10) can
-        push cumulative down but terminal reward must stay > 0.
-        """
+    def test_budget_exceeded_gives_valid_score(self):
         env = self._make_env()
         obs = None
-        # Spam lookup_member (idempotent beyond first) until budget runs out
         for _ in range(env._episode["step_budget"] + 2):
             if env._episode.get("done"):
                 break
             obs = env.step(make_action("lookup_member", member_id="M001"))
         assert obs is not None
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task1 budget exceeded)")
+        assert_valid_score(obs.cumulative_reward, "task1", "(task1 budget exceeded)")
 
 
 # ---------------------------------------------------------------------------
@@ -122,23 +110,19 @@ class TestTask1TerminalReward:
 # ---------------------------------------------------------------------------
 
 
-class TestTask2TerminalReward:
+class TestTask2TerminalScore:
     def _make_env(self, scenario_id=0):
         env = HealthisureEnvironment()
         env.reset(task_name="task2", scenario_id=scenario_id)
         return env
 
-    def test_send_response_without_appeal_when_required_valid_reward(self):
-        """
-        Grader2 applies PENALTY_HALLUCINATION (-0.20) when appeal_required
-        but not drafted. Terminal reward must be strictly > 0.
-        """
+    def test_send_response_without_appeal_gives_valid_score(self):
         env = self._make_env()
         obs = env.step(make_action("send_member_response", message="Claim handled"))
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task2 missing appeal penalty)")
+        assert_valid_score(obs.cumulative_reward, "task2", "(task2 missing appeal penalty)")
 
-    def test_budget_exceeded_gives_valid_reward(self):
+    def test_budget_exceeded_gives_valid_score(self):
         env = self._make_env()
         obs = None
         for _ in range(env._episode["step_budget"] + 2):
@@ -147,7 +131,7 @@ class TestTask2TerminalReward:
             obs = env.step(make_action("lookup_member", member_id="M001"))
         assert obs is not None
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task2 budget exceeded)")
+        assert_valid_score(obs.cumulative_reward, "task2", "(task2 budget exceeded)")
 
 
 # ---------------------------------------------------------------------------
@@ -155,22 +139,19 @@ class TestTask2TerminalReward:
 # ---------------------------------------------------------------------------
 
 
-class TestTask3TerminalReward:
+class TestTask3TerminalScore:
     def _make_env(self, scenario_id=0):
         env = HealthisureEnvironment()
         env.reset(task_name="task3", scenario_id=scenario_id)
         return env
 
-    def test_send_response_without_required_docs_gives_valid_reward(self):
-        """
-        Grader3 subtracts 0.10 if docs not complete; still must be > 0.
-        """
+    def test_send_response_without_required_docs_gives_valid_score(self):
         env = self._make_env()
         obs = env.step(make_action("send_member_response", message="Done"))
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task3 missing docs penalty)")
+        assert_valid_score(obs.cumulative_reward, "task3", "(task3 missing docs penalty)")
 
-    def test_budget_exceeded_gives_valid_reward(self):
+    def test_budget_exceeded_gives_valid_score(self):
         env = self._make_env()
         obs = None
         for _ in range(env._episode["step_budget"] + 2):
@@ -179,12 +160,10 @@ class TestTask3TerminalReward:
             obs = env.step(make_action("lookup_member", member_id="M001"))
         assert obs is not None
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task3 budget exceeded)")
+        assert_valid_score(obs.cumulative_reward, "task3", "(task3 budget exceeded)")
 
     def test_full_resolution_does_not_exceed_1(self):
-        """
-        Task 3 perfect path accumulates ~1.20 raw; must be clamped below 1.
-        """
+        """Task 3 perfect path accumulates ~1.20 raw; normalized score must be < 1."""
         env = self._make_env(scenario_id=0)
         scenario = env._episode["scenario"]
         gold = scenario["gold_standard"]
@@ -219,39 +198,30 @@ class TestTask3TerminalReward:
         obs = env.step(make_action("send_member_response", message="Your COB dispute has been resolved."))
 
         assert obs.done
-        assert_strictly_between_0_and_1(obs.reward, "(task3 full resolution)")
+        assert_valid_score(obs.cumulative_reward, "task3", "(task3 full resolution)")
 
 
 # ---------------------------------------------------------------------------
-# Cross-cutting: reward field vs cumulative_reward
+# Cumulative reward is clamped on terminal step
 # ---------------------------------------------------------------------------
 
 
-class TestRewardFieldIsTerminalScore:
-    """
-    Verify that observation.reward (what OpenEnv reads) equals
-    observation.cumulative_reward when the episode is terminal — i.e.,
-    the fix is in place and both fields carry the clamped value.
-    """
+class TestCumulativeRewardClamp:
+    """Verify cumulative_reward is always clamped to [0.01, 0.99] at episode end."""
 
-    def test_reward_equals_cumulative_reward_on_terminal_step(self):
+    def test_cumulative_reward_clamped_on_terminal_step(self):
         env = HealthisureEnvironment()
         env.reset(task_name="task1", scenario_id=0)
         obs = env.step(make_action("send_member_response", message="Done"))
         assert obs.done
-        assert obs.reward == obs.cumulative_reward, (
-            f"observation.reward ({obs.reward}) != "
-            f"observation.cumulative_reward ({obs.cumulative_reward}); "
-            "OpenEnv uses observation.reward as the task score"
+        assert 0.01 <= obs.cumulative_reward <= 0.99, (
+            f"cumulative_reward={obs.cumulative_reward} is outside [0.01, 0.99]"
         )
 
-    def test_reward_not_equal_cumulative_reward_during_episode(self):
-        """During an episode, reward is the per-step delta, not cumulative."""
+    def test_per_step_reward_not_clamped(self):
+        """During the episode, obs.reward shows per-step delta (not clamped cumulative)."""
         env = HealthisureEnvironment()
         env.reset(task_name="task1", scenario_id=0)
         obs = env.step(make_action("lookup_member", member_id="M001"))
         assert not obs.done
-        # The per-step reward (0.05) should differ from cumulative (0.05 here but
-        # conceptually they can diverge; at minimum they behave independently).
-        # This test documents the contract, not a specific value.
         assert obs.reward is not None

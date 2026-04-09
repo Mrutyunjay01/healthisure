@@ -4,3 +4,24 @@ type: space
 runtime: fastapi
 app: server.app:app
 port: 7860
+
+rewards:
+  member_lookup: 0.05
+  cpt_resolution: 0.10
+  cost_share_correct: 0.15
+  pa_flag: 0.10
+  denial_decode: 0.10
+  appeal_letter: 0.20
+  full_resolution: 0.30
+  penalties:
+    hallucination: -0.20
+    missed_pa: -0.15
+    wrong_cob: -0.20
+    step_budget: -0.10
+  tasks:
+    task1:
+      max_score: 0.95
+    task2:
+      max_score: 0.95
+    task3:
+      max_score: 1.20

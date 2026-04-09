@@ -5,26 +5,24 @@ Abstract base class for Healthisure graders.
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+import config
+
 
 class BaseGrader(ABC):
-    """
-    Abstract base for deterministic step-by-step graders.
+    """Abstract base for deterministic step-by-step graders."""
 
-    Reward constants shared across all graders.
-    """
+    REWARD_MEMBER_LOOKUP = config.REWARD_MEMBER_LOOKUP
+    REWARD_CPT_RESOLUTION = config.REWARD_CPT_RESOLUTION
+    REWARD_COST_SHARE_CORRECT = config.REWARD_COST_SHARE_CORRECT
+    REWARD_PA_FLAG = config.REWARD_PA_FLAG
+    REWARD_DENIAL_DECODE = config.REWARD_DENIAL_DECODE
+    REWARD_APPEAL_LETTER = config.REWARD_APPEAL_LETTER
+    REWARD_FULL_RESOLUTION = config.REWARD_FULL_RESOLUTION
 
-    REWARD_MEMBER_LOOKUP = 0.05
-    REWARD_CPT_RESOLUTION = 0.10
-    REWARD_COST_SHARE_CORRECT = 0.15
-    REWARD_PA_FLAG = 0.10
-    REWARD_DENIAL_DECODE = 0.10
-    REWARD_APPEAL_LETTER = 0.20
-    REWARD_FULL_RESOLUTION = 0.30
-
-    PENALTY_HALLUCINATION = -0.20
-    PENALTY_MISSED_PA = -0.15
-    PENALTY_WRONG_COB = -0.20
-    PENALTY_STEP_BUDGET = -0.10
+    PENALTY_HALLUCINATION = config.PENALTY_HALLUCINATION
+    PENALTY_MISSED_PA = config.PENALTY_MISSED_PA
+    PENALTY_WRONG_COB = config.PENALTY_WRONG_COB
+    PENALTY_STEP_BUDGET = config.PENALTY_STEP_BUDGET
 
     @abstractmethod
     def grade_step(

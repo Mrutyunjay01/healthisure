@@ -256,6 +256,7 @@ def stop_server() -> None:
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from client import HealthisureEnvClient  # noqa: E402
 from models import HealthisureAction  # noqa: E402
+from config import TASK_MAX_SCORES  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # LLM prompts
@@ -403,7 +404,7 @@ def run_task(task_name: str) -> None:
     history: List[Dict[str, Any]] = []
     total_steps = 0
     success = False
-    final_score = 0.0
+    last_cumulative = 0.0
 
     try:
         with HealthisureEnvClient(base_url=ENV_URL).sync() as env:
@@ -429,6 +430,7 @@ def run_task(task_name: str) -> None:
 
                 step_reward = round(result.reward or 0.0, 2)
                 rewards.append(step_reward)
+                last_cumulative = obs.cumulative_reward
                 total_steps = step_num
 
                 error_str = obs.error if obs.error else "null"
@@ -447,11 +449,13 @@ def run_task(task_name: str) -> None:
                     "step_reward": step_reward,
                 })
 
-            final_score = min(max(obs.cumulative_reward, 0.0), 1.0)
-            success = obs.done and final_score > 0
+            success = obs.done
 
     except Exception as e:
         print(f"[ERROR] Episode failed: {e}", file=sys.stderr, flush=True)
+
+    max_score = TASK_MAX_SCORES.get(task_name, 1.0)
+    final_score = max(0.01, min(0.99, last_cumulative / max_score))
 
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     print(
