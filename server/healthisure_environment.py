@@ -203,11 +203,16 @@ class HealthisureEnvironment(Environment):
 
         error_msg = result.get("error") if not result.get("success") else None
 
+        # Use the clamped cumulative reward as the terminal reward so that the
+        # OpenEnv framework (which reads observation.reward, not cumulative_reward)
+        # always receives a value strictly within (0, 1).
+        reported_reward = ep["cumulative_reward"] if done else step_reward
+
         return self._build_obs(
             last_result=result.get("message", ""),
             error=error_msg,
             done=done,
-            step_reward=step_reward,
+            step_reward=reported_reward,
         )
 
     @property
