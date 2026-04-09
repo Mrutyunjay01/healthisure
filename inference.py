@@ -217,7 +217,7 @@ def _start_with_uvicorn(url: str) -> None:
         pass
 
     _server_proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "healthisure.server.app:app", "--host", "127.0.0.1", "--port", port],
+        [sys.executable, "-m", "uvicorn", "server.app:app", "--host", "127.0.0.1", "--port", port],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
